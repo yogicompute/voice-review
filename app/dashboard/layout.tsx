@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { Building2, LayoutDashboard, CreditCard } from "lucide-react";
+import { Building2, LayoutDashboard, CreditCard, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default async function DashboardLayout({
@@ -18,9 +18,14 @@ export default async function DashboardLayout({
   const pathname = headersList.get("x-invoke-path") ?? "";
 
   const navItems = [
-    { href: "/dashboard",             label: "Overview",    icon: LayoutDashboard },
-    { href: "/dashboard/businesses",  label: "Businesses",  icon: Building2       },
-    { href: "/dashboard/billing",     label: "Billing",     icon: CreditCard      },
+    { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    { href: "/dashboard/businesses", label: "Businesses", icon: Building2 },
+    { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
+    {
+      href: "/dashboard/getting-started",
+      label: "Setup guide",
+      icon: BookOpen,
+    },
   ];
 
   return (
@@ -41,8 +46,8 @@ export default async function DashboardLayout({
                 pathname.startsWith(href) && href !== "/dashboard"
                   ? "bg-gray-100 text-gray-900 font-medium"
                   : pathname === href
-                  ? "bg-gray-100 text-gray-900 font-medium"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-gray-100 text-gray-900 font-medium"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
               )}
             >
               <Icon size={16} />
