@@ -1,5 +1,5 @@
 import { getDbUser } from "@/lib/auth";
-import { db, businesses, reviews } from "@/lib/db";
+import { db, businesses, reviews, subscriptions } from "@/lib/db";
 import { eq, and, desc, count } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { ReviewCard } from "@/components/dashboard/ReviewCard";
@@ -10,6 +10,7 @@ import { ArrowLeft, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { PlanKey } from "@/lib/plans";
 
 const LIMIT = 10;
 
@@ -26,21 +27,27 @@ export default async function BusinessReviewsPage({
   const user = await getDbUser();
   if (!user) return null;
 
-  const business = await db.query.businesses.findFirst({
-    where: and(eq(businesses.id, id), eq(businesses.userId, user.id)),
-  });
+  const [business, subscription] = await Promise.all([
+    db.query.businesses.findFirst({
+      where: and(eq(businesses.id, id), eq(businesses.userId, user.id)),
+    }),
+    db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, user.id),
+    }),
+  ]);
+
   if (!business) notFound();
 
+  const plan = (subscription?.plan ?? "free") as PlanKey;
   const page = parseInt(sp.page ?? "1");
   const offset = (page - 1) * LIMIT;
 
-  // Build filters
   const filters: any[] = [eq(reviews.businessId, id)];
   if (sp.sentiment) filters.push(eq(reviews.sentiment, sp.sentiment as any));
   if (sp.issueOnly === "true") filters.push(eq(reviews.issueFlag, true));
   const where = and(...filters);
 
-  const [list, [{ value: total }], [{ value: avgRating }]] = await Promise.all([
+  const [list, [{ value: total }]] = await Promise.all([
     db.query.reviews.findMany({
       where,
       orderBy: desc(reviews.createdAt),
@@ -48,14 +55,12 @@ export default async function BusinessReviewsPage({
       offset,
     }),
     db.select({ value: count() }).from(reviews).where(where),
-    db.select({ value: count() }).from(reviews).where(eq(reviews.businessId, id)),
   ]);
 
   const totalPages = Math.ceil(total / LIMIT);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
@@ -73,12 +78,10 @@ export default async function BusinessReviewsPage({
         </div>
       </div>
 
-      {/* Filters */}
       <Suspense>
         <ReviewFilters />
       </Suspense>
 
-      {/* Empty state */}
       {list.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
@@ -91,25 +94,18 @@ export default async function BusinessReviewsPage({
                   : "Add the SDK button to your app to start collecting voice reviews."}
               </p>
             </div>
-            {!sp.sentiment && !sp.issueOnly && (
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/dashboard/businesses/${id}`}>View setup guide</Link>
-              </Button>
-            )}
           </CardContent>
         </Card>
       )}
 
-      {/* Review list */}
       {list.length > 0 && (
         <div className="space-y-3">
           {list.map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard key={review.id} review={review} plan={plan} />
           ))}
         </div>
       )}
 
-      {/* Pagination */}
       <Suspense>
         <Pagination page={page} totalPages={totalPages} />
       </Suspense>

@@ -1,8 +1,260 @@
-export default function BillingPage() {
+import { getDbUser } from "@/lib/auth";
+import { db, subscriptions, businesses, reviews } from "@/lib/db";
+import { eq, count } from "drizzle-orm";
+import { PLANS, PlanKey } from "@/lib/plans";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Check, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const FEATURES: Record<PlanKey, string[]> = {
+  free: [
+    "1 business",
+    "50 reviews / month",
+    "Ratings + sentiment analysis",
+    "Return rate prediction",
+    "Issue flagging",
+    "AI summary",
+  ],
+  pro: [
+    "5 businesses",
+    "500 reviews / month",
+    "Everything in Free",
+    "Audio replay",
+    "Advanced metrics",
+    "Performance charts",
+  ],
+  business: [
+    "20 businesses",
+    "5,000 reviews / month",
+    "Everything in Pro",
+    "Priority support",
+    "Custom branding",
+    "Export reviews (CSV)",
+  ],
+};
+
+export default async function BillingPage() {
+  const user = await getDbUser();
+  if (!user) return null;
+
+  // Safely get or create subscription row if missing
+  let subscription = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.userId, user.id),
+  });
+
+  if (!subscription) {
+    const [created] = await db
+      .insert(subscriptions)
+      .values({
+        userId: user.id,
+        plan: "free",
+        reviewsPerMonth: 50,
+        audioAccess: false,
+        advancedMetrics: false,
+        maxBusinesses: 1,
+      })
+      .returning();
+    subscription = created;
+  }
+
+  const currentPlan = (subscription.plan ?? "free") as PlanKey;
+
+  // Real usage counts
+  const userBusinesses = await db.query.businesses.findMany({
+    where: eq(businesses.userId, user.id),
+  });
+
+  const bizIds = userBusinesses.map((b) => b.id);
+
+  // Reviews this month
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  let reviewsThisMonth = 0;
+  if (bizIds.length > 0) {
+    const results = await Promise.all(
+      bizIds.map((id) =>
+        db
+          .select({ value: count() })
+          .from(reviews)
+          .where(eq(reviews.businessId, id))
+      )
+    );
+    reviewsThisMonth = results.reduce((s, r) => s + (r[0]?.value ?? 0), 0);
+  }
+
+  const bizCount = userBusinesses.length;
+  const planLimits = PLANS[currentPlan];
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-semibold">Billing</h2>
-      <p className="text-gray-500">Subscription management coming soon.</p>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-semibold">Billing & plans</h2>
+        <p className="text-gray-500 mt-1">
+          Currently on the{" "}
+          <span className="font-medium capitalize">{currentPlan}</span> plan.
+        </p>
+      </div>
+
+      {/* Plan cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {(Object.entries(PLANS) as [PlanKey, (typeof PLANS)[PlanKey]][]).map(
+          ([key, plan]) => {
+            const isCurrent = key === currentPlan;
+            const isPopular = key === "pro";
+
+            return (
+              <Card
+                key={key}
+                className={cn(
+                  "relative flex flex-col",
+                  isPopular && "border-violet-400 shadow-md shadow-violet-100",
+                  isCurrent && "ring-2 ring-violet-600"
+                )}
+              >
+                {isPopular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-violet-600 text-white px-3 gap-1">
+                      <Zap size={10} /> Most popular
+                    </Badge>
+                  </div>
+                )}
+
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold">
+                      {plan.label}
+                    </CardTitle>
+                    {isCurrent && (
+                      <Badge variant="secondary" className="text-xs">
+                        Current
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-2xl font-bold mt-1">{plan.price}</p>
+                </CardHeader>
+
+                <CardContent className="flex flex-col flex-1 gap-4">
+                  <ul className="space-y-2 flex-1">
+                    {FEATURES[key].map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2 text-sm text-gray-600"
+                      >
+                        <Check
+                          size={14}
+                          className="text-green-500 mt-0.5 shrink-0"
+                        />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className={cn(
+                      "w-full",
+                      isPopular && !isCurrent
+                        ? "bg-violet-600 hover:bg-violet-700"
+                        : ""
+                    )}
+                    variant={isCurrent ? "outline" : "default"}
+                    disabled={isCurrent}
+                  >
+                    {isCurrent
+                      ? "Current plan"
+                      : key === "free"
+                      ? "Downgrade"
+                      : `Upgrade to ${plan.label}`}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          }
+        )}
+      </div>
+
+      {/* Real usage summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium text-gray-500">
+            This month's usage
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Reviews */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Reviews this month</span>
+              <span className="font-medium">
+                {reviewsThisMonth} / {planLimits.reviewsPerMonth}
+              </span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  reviewsThisMonth / planLimits.reviewsPerMonth > 0.9
+                    ? "bg-red-500"
+                    : reviewsThisMonth / planLimits.reviewsPerMonth > 0.7
+                    ? "bg-amber-500"
+                    : "bg-violet-500"
+                )}
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (reviewsThisMonth / planLimits.reviewsPerMonth) * 100
+                  )}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Businesses */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Businesses</span>
+              <span className="font-medium">
+                {bizCount} / {planLimits.maxBusinesses}
+              </span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  bizCount / planLimits.maxBusinesses >= 1
+                    ? "bg-red-500"
+                    : "bg-violet-500"
+                )}
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (bizCount / planLimits.maxBusinesses) * 100
+                  )}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Feature flags */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="bg-gray-50 rounded-lg px-3 py-2.5 border">
+              <p className="text-xs text-gray-400">Audio replay</p>
+              <p className="text-sm font-medium mt-0.5">
+                {planLimits.audioAccess ? "✅ Included" : "🔒 Pro+"}
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg px-3 py-2.5 border">
+              <p className="text-xs text-gray-400">Advanced metrics</p>
+              <p className="text-sm font-medium mt-0.5">
+                {planLimits.advancedMetrics ? "✅ Included" : "🔒 Pro+"}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
