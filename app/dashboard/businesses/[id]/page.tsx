@@ -2,11 +2,18 @@ import { getDbUser } from "@/lib/auth";
 import { db, businesses } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import { Building2, Key, ExternalLink } from "lucide-react";
+import { BarChart2 } from "lucide-react";
 import Link from "next/link";
 
 export default async function BusinessDetailPage({
@@ -40,7 +47,9 @@ export default async function BusinessDetailPage({
           </div>
           <div>
             <h2 className="text-2xl font-semibold">{business.name}</h2>
-            <p className="text-gray-400 text-sm">{business.category ?? "No category"}</p>
+            <p className="text-gray-400 text-sm">
+              {business.category ?? "No category"}
+            </p>
           </div>
         </div>
         <Badge variant={business.isActive ? "default" : "secondary"}>
@@ -60,7 +69,9 @@ export default async function BusinessDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">API Key</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              API Key
+            </p>
             <div className="flex items-center gap-2">
               <code className="flex-1 bg-gray-50 border rounded-md px-3 py-2 text-sm font-mono truncate">
                 {business.apiKey}
@@ -70,7 +81,9 @@ export default async function BusinessDetailPage({
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Business ID</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Business ID
+            </p>
             <div className="flex items-center gap-2">
               <code className="flex-1 bg-gray-50 border rounded-md px-3 py-2 text-sm font-mono truncate">
                 {business.id}
@@ -98,11 +111,17 @@ export default async function BusinessDetailPage({
               <CopyButton text={snippet} dark />
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex gap-3">
             <Button variant="outline" size="sm" asChild>
               <Link href={`/dashboard/businesses/${business.id}/reviews`}>
                 <ExternalLink size={13} className="mr-2" />
                 View reviews
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/businesses/${business.id}/performance`}>
+                <BarChart2 size={13} className="mr-2" />
+                Performance
               </Link>
             </Button>
           </div>
