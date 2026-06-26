@@ -42,7 +42,7 @@ export function ReviewFilters() {
           {s.label}
         </Button>
       ))}
-      <div className="w-px h-5 bg-gray-200 mx-1" />
+      <div className="w-px h-5 bg-border mx-1" />
       <Button
         size="sm"
         variant={issueOnly ? "destructive" : "outline"}

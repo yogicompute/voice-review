@@ -20,11 +20,11 @@ export function ReturnRateChart({ data }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-500">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             Likely return rate over time
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40 text-gray-300 text-sm">
+        <CardContent className="flex items-center justify-center h-40 text-muted-foreground/40 text-sm">
           Not enough data yet
         </CardContent>
       </Card>
@@ -34,7 +34,7 @@ export function ReturnRateChart({ data }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-gray-500">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
           Likely return rate over time (last 30 days)
         </CardTitle>
       </CardHeader>

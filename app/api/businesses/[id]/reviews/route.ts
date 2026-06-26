@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { db, users, businesses, reviews } from "@/lib/db";
+import { db, users, businesses, reviews, sentimentEnum } from "@/lib/db";
 import { eq, and, desc, count } from "drizzle-orm";
+
+type Sentiment = (typeof sentimentEnum.enumValues)[number];
 
 export async function GET(
   req: Request,
@@ -33,7 +35,7 @@ export async function GET(
 
   // Build filters
   const filters = [eq(reviews.businessId, id)];
-  if (sentiment) filters.push(eq(reviews.sentiment, sentiment as any));
+  if (sentiment) filters.push(eq(reviews.sentiment, sentiment as Sentiment));
   if (issueOnly) filters.push(eq(reviews.issueFlag, true));
 
   const where = and(...filters);

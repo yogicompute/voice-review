@@ -24,7 +24,6 @@ export function GettingStarted({
   hasBusiness,
   hasReview,
   businessId,
-  apiKey,
 }: GettingStartedProps) {
   const steps: Step[] = [
     {
@@ -42,9 +41,9 @@ export function GettingStarted({
       id: 2,
       title: "Install the SDK button",
       description:
-        "Copy the code snippet and drop it into your app where customers can leave feedback.",
+        "Copy the snippet and drop it into your app where customers leave feedback.",
       icon: <Code2 size={18} />,
-      done: hasBusiness, // unlocked once business exists
+      done: hasBusiness,
       action:
         hasBusiness && businessId
           ? { label: "View credentials", href: `/dashboard/businesses/${businessId}` }
@@ -61,42 +60,37 @@ export function GettingStarted({
         hasBusiness && !hasReview
           ? { label: "Test the button", href: "/test-button" }
           : hasReview && businessId
-          ? { label: "View reviews", href: `/dashboard/businesses/${businessId}/reviews` }
-          : undefined,
+            ? { label: "View reviews", href: `/dashboard/businesses/${businessId}/reviews` }
+            : undefined,
     },
   ];
 
   const completedCount = steps.filter((s) => s.done).length;
-  const allDone = completedCount === steps.length;
-
-  if (allDone) return null; // hide once complete
+  if (completedCount === steps.length) return null;
 
   return (
-    <Card className="border-violet-100 bg-linear-to-br from-violet-50/60 to-white">
-      <CardContent className="py-6 px-6 space-y-5">
-        {/* Header */}
+    <Card className="border-primary/15 bg-gradient-to-br from-accent/60 to-card">
+      <CardContent className="space-y-5 px-6 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-800">Getting started</h3>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h3 className="font-semibold">Getting started</h3>
+            <p className="mt-0.5 text-sm text-muted-foreground">
               {completedCount} of {steps.length} steps complete
             </p>
           </div>
-          {/* Progress pills */}
           <div className="flex gap-1.5">
             {steps.map((s) => (
               <div
                 key={s.id}
                 className={cn(
                   "h-1.5 w-8 rounded-full transition-colors",
-                  s.done ? "bg-violet-500" : "bg-gray-200"
+                  s.done ? "bg-primary" : "bg-border",
                 )}
               />
             ))}
           </div>
         </div>
 
-        {/* Steps */}
         <div className="space-y-3">
           {steps.map((step, idx) => {
             const isLocked = idx > 0 && !steps[idx - 1].done;
@@ -104,52 +98,46 @@ export function GettingStarted({
               <div
                 key={step.id}
                 className={cn(
-                  "flex items-start gap-4 p-4 rounded-xl border transition-all",
+                  "flex items-start gap-4 rounded-xl border p-4 transition-all",
                   step.done
-                    ? "bg-white border-green-100"
+                    ? "border-emerald-200/70 bg-card"
                     : isLocked
-                    ? "bg-gray-50 border-gray-100 opacity-50"
-                    : "bg-white border-violet-100 shadow-sm"
+                      ? "border-border bg-secondary/50 opacity-60"
+                      : "border-primary/20 bg-card shadow-sm",
                 )}
               >
-                {/* Icon / check */}
                 <div
                   className={cn(
-                    "w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                    "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full",
                     step.done
-                      ? "bg-green-100 text-green-600"
+                      ? "bg-emerald-100 text-emerald-600"
                       : isLocked
-                      ? "bg-gray-100 text-gray-400"
-                      : "bg-violet-100 text-violet-600"
+                        ? "bg-secondary text-muted-foreground"
+                        : "bg-accent text-primary",
                   )}
                 >
                   {step.done ? <Check size={16} /> : step.icon}
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      step.done ? "text-gray-400 line-through" : "text-gray-800"
+                      step.done ? "text-muted-foreground line-through" : "text-foreground",
                     )}
                   >
                     {step.title}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                     {step.description}
                   </p>
                 </div>
 
-                {/* Action */}
                 {step.action && !isLocked && (
                   <Button
                     size="sm"
                     variant={step.done ? "ghost" : "default"}
-                    className={cn(
-                      "shrink-0 text-xs h-8 gap-1",
-                      !step.done && "bg-violet-600 hover:bg-violet-700"
-                    )}
+                    className="h-8 shrink-0 gap-1 text-xs"
                     asChild
                   >
                     <Link href={step.action.href}>

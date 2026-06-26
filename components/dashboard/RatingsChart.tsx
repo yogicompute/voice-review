@@ -26,11 +26,11 @@ export function RatingsChart({ data }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-500">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             Avg rating over time
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40 text-gray-300 text-sm">
+        <CardContent className="flex items-center justify-center h-40 text-muted-foreground/40 text-sm">
           Not enough data yet
         </CardContent>
       </Card>
@@ -40,7 +40,7 @@ export function RatingsChart({ data }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-gray-500">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
           Avg rating over time (last 30 days)
         </CardTitle>
       </CardHeader>
@@ -74,9 +74,9 @@ export function RatingsChart({ data }: Props) {
             <Line
               type="monotone"
               dataKey="avgRating"
-              stroke="#7c3aed"
+              stroke="#059669"
               strokeWidth={2}
-              dot={{ r: 3, fill: "#7c3aed", strokeWidth: 0 }}
+              dot={{ r: 3, fill: "#059669", strokeWidth: 0 }}
               activeDot={{ r: 5 }}
             />
           </LineChart>

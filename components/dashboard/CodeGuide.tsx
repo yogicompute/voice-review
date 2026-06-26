@@ -67,7 +67,7 @@ export default function OrderConfirmation({ orderId }) {
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 text-sm font-mono">
+            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono">
               {installSnippet}
             </pre>
             <div className="absolute top-3 right-3">
@@ -88,12 +88,12 @@ export default function OrderConfirmation({ orderId }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Drop this into your order confirmation page, delivery screen, or
             post-service modal.
           </p>
           <div className="relative">
-            <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
+            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
               {basicSnippet}
             </pre>
             <div className="absolute top-3 right-3">
@@ -114,11 +114,11 @@ export default function OrderConfirmation({ orderId }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Adjust colors, labels, max duration, and handle results in your own UI.
           </p>
           <div className="relative">
-            <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
+            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
               {advancedSnippet}
             </pre>
             <div className="absolute top-3 right-3">
@@ -139,11 +139,11 @@ export default function OrderConfirmation({ orderId }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Send audio as multipart/form-data to the endpoint with your API key header.
           </p>
           <div className="relative">
-            <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 text-sm font-mono overflow-x-auto">
+            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto">
               {curlSnippet}
             </pre>
             <div className="absolute top-3 right-3">

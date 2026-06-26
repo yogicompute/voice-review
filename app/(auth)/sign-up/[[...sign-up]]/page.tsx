@@ -1,12 +1,14 @@
 import { SignUp } from "@clerk/nextjs";
+import { AuthShell, clerkAppearance } from "@/components/auth/AuthShell";
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <AuthShell title="Create your account" subtitle="Start collecting voice reviews for free">
       <SignUp
+        appearance={clerkAppearance}
         fallbackRedirectUrl="/dashboard"
         forceRedirectUrl="/dashboard"
       />
-    </div>
+    </AuthShell>
   );
 }

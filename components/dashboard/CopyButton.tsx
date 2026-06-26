@@ -21,7 +21,7 @@ export function CopyButton({ text, dark }: { text: string; dark?: boolean }) {
       onClick={copy}
       className={cn(
         "h-8 w-8 shrink-0",
-        dark && "text-gray-400 hover:text-white hover:bg-gray-800"
+        dark && "text-muted-foreground/70 hover:text-white hover:bg-gray-800"
       )}
     >
       {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}

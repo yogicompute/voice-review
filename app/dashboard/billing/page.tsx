@@ -4,7 +4,7 @@ import { eq, count } from "drizzle-orm";
 import { PLANS, PlanKey } from "@/lib/plans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { UpgradeButton } from "@/components/dashboard/UpgradeButton";
 import { Check, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -92,10 +92,10 @@ export default async function BillingPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-semibold">Billing & plans</h2>
-        <p className="text-gray-500 mt-1">
+        <h2 className="text-2xl font-semibold tracking-tight">Billing &amp; plans</h2>
+        <p className="mt-1 text-muted-foreground">
           Currently on the{" "}
-          <span className="font-medium capitalize">{currentPlan}</span> plan.
+          <span className="font-medium capitalize text-foreground">{currentPlan}</span> plan.
         </p>
       </div>
 
@@ -104,25 +104,32 @@ export default async function BillingPage() {
         {(Object.entries(PLANS) as [PlanKey, (typeof PLANS)[PlanKey]][]).map(
           ([key, plan]) => {
             const isCurrent = key === currentPlan;
-            const isPopular = key === "pro";
+            const isPopularPlan = key === "pro";
+
+            const rank: Record<PlanKey, number> = { free: 0, pro: 1, business: 2 };
+            const label =
+              key === "free"
+                ? "Downgrade"
+                : rank[key] < rank[currentPlan]
+                  ? "Change plan"
+                  : `Upgrade to ${plan.label}`;
 
             return (
-              <Card
-                key={key}
-                className={cn(
-                  "relative flex flex-col",
-                  isPopular && "border-violet-400 shadow-md shadow-violet-100",
-                  isCurrent && "ring-2 ring-violet-600"
-                )}
-              >
-                {isPopular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-violet-600 text-white px-3 gap-1">
+              <div key={key} className="relative">
+                {isPopularPlan && (
+                  <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
+                    <Badge className="gap-1 bg-primary px-3 text-primary-foreground shadow-sm">
                       <Zap size={10} /> Most popular
                     </Badge>
                   </div>
                 )}
-
+                <Card
+                  className={cn(
+                    "flex h-full flex-col",
+                    isPopularPlan && "border-primary shadow-md shadow-primary/10",
+                    isCurrent && "ring-2 ring-primary"
+                  )}
+                >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base font-semibold">
@@ -142,35 +149,21 @@ export default async function BillingPage() {
                     {FEATURES[key].map((f) => (
                       <li
                         key={f}
-                        className="flex items-start gap-2 text-sm text-gray-600"
+                        className="flex items-start gap-2 text-sm text-muted-foreground"
                       >
                         <Check
                           size={14}
-                          className="text-green-500 mt-0.5 shrink-0"
+                          className="mt-0.5 shrink-0 text-primary"
                         />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  <Button
-                    className={cn(
-                      "w-full",
-                      isPopular && !isCurrent
-                        ? "bg-violet-600 hover:bg-violet-700"
-                        : ""
-                    )}
-                    variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent}
-                  >
-                    {isCurrent
-                      ? "Current plan"
-                      : key === "free"
-                      ? "Downgrade"
-                      : `Upgrade to ${plan.label}`}
-                  </Button>
+                  <UpgradeButton plan={key} currentPlan={currentPlan} label={label} />
                 </CardContent>
-              </Card>
+                </Card>
+              </div>
             );
           }
         )}
@@ -179,20 +172,20 @@ export default async function BillingPage() {
       {/* Real usage summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-500">
-            This month's usage
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            This month&apos;s usage
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Reviews */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Reviews this month</span>
+              <span className="text-muted-foreground">Reviews this month</span>
               <span className="font-medium">
                 {reviewsThisMonth} / {planLimits.reviewsPerMonth}
               </span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
               <div
                 className={cn(
                   "h-full rounded-full transition-all",
@@ -200,7 +193,7 @@ export default async function BillingPage() {
                     ? "bg-red-500"
                     : reviewsThisMonth / planLimits.reviewsPerMonth > 0.7
                     ? "bg-amber-500"
-                    : "bg-violet-500"
+                    : "bg-primary"
                 )}
                 style={{
                   width: `${Math.min(
@@ -215,18 +208,18 @@ export default async function BillingPage() {
           {/* Businesses */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Businesses</span>
+              <span className="text-muted-foreground">Businesses</span>
               <span className="font-medium">
                 {bizCount} / {planLimits.maxBusinesses}
               </span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
               <div
                 className={cn(
                   "h-full rounded-full transition-all",
                   bizCount / planLimits.maxBusinesses >= 1
                     ? "bg-red-500"
-                    : "bg-violet-500"
+                    : "bg-primary"
                 )}
                 style={{
                   width: `${Math.min(
@@ -240,14 +233,14 @@ export default async function BillingPage() {
 
           {/* Feature flags */}
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="bg-gray-50 rounded-lg px-3 py-2.5 border">
-              <p className="text-xs text-gray-400">Audio replay</p>
+            <div className="bg-secondary rounded-lg px-3 py-2.5 border">
+              <p className="text-xs text-muted-foreground/70">Audio replay</p>
               <p className="text-sm font-medium mt-0.5">
                 {planLimits.audioAccess ? "✅ Included" : "🔒 Pro+"}
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg px-3 py-2.5 border">
-              <p className="text-xs text-gray-400">Advanced metrics</p>
+            <div className="bg-secondary rounded-lg px-3 py-2.5 border">
+              <p className="text-xs text-muted-foreground/70">Advanced metrics</p>
               <p className="text-sm font-medium mt-0.5">
                 {planLimits.advancedMetrics ? "✅ Included" : "🔒 Pro+"}
               </p>

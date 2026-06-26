@@ -8,6 +8,13 @@
       "when": 1782030468382,
       "tag": "0000_bright_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782497896346,
+      "tag": "0001_warm_shooting_star",
+      "breakpoints": true
     }
   ]
 }

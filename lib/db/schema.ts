@@ -41,7 +41,7 @@ export const users = pgTable(
     email: text("email").notNull(),
     name: text("name"),
     plan: planEnum("plan").notNull().default("free"),
-    stripeCustomerId: text("stripe_customer_id"),
+    razorpayCustomerId: text("razorpay_customer_id"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -136,6 +136,10 @@ export const subscriptions = pgTable("subscriptions", {
   audioAccess: boolean("audio_access").notNull().default(false),
   advancedMetrics: boolean("advanced_metrics").notNull().default(false),
   maxBusinesses: integer("max_businesses").notNull().default(1),
+  // Razorpay billing
+  razorpaySubscriptionId: text("razorpay_subscription_id"),
+  razorpayCustomerId: text("razorpay_customer_id"),
+  status: text("status").notNull().default("active"),
   // Billing period
   currentPeriodStart: timestamp("current_period_start"),
   currentPeriodEnd: timestamp("current_period_end"),

@@ -44,7 +44,7 @@ export default async function PerformancePage({
         </Button>
         <div>
           <h2 className="text-2xl font-semibold">{business.name}</h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Performance overview · last 30 days
           </p>
         </div>

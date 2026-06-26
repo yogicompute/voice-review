@@ -18,7 +18,7 @@ export function VoiceReviewButtonDemo({
       onSuccess={(result) => console.log("Review result:", result)}
       onError={(err) => console.error("Error:", err)}
       theme={{
-        primary: "#7c3aed",
+        primary: "#059669",
         borderRadius: "16px",
       }}
       labels={{

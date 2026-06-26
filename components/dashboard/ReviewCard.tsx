@@ -24,14 +24,14 @@ export function ReviewCard({ review, plan }: ReviewCardProps) {
         {/* Top row */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-              <User size={14} className="text-gray-400" />
+            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+              <User size={14} className="text-muted-foreground/70" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-800">
+              <p className="text-sm font-medium text-foreground">
                 {review.customerRef ? `Order #${review.customerRef}` : "Anonymous"}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground/70">
                 {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
               </p>
             </div>
@@ -62,7 +62,7 @@ export function ReviewCard({ review, plan }: ReviewCardProps) {
           <div className="flex items-center gap-3 flex-wrap">
             <StarRating rating={review.rating ?? 0} />
             {review.sentiment && <SentimentBadge sentiment={review.sentiment} />}
-            <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full border">
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full border">
               <RotateCcw size={10} />
               {review.likelyReturnRate}% return rate
             </span>
@@ -71,14 +71,14 @@ export function ReviewCard({ review, plan }: ReviewCardProps) {
 
         {/* Summary (all plans) */}
         {review.summary && (
-          <p className="text-sm text-gray-600 italic border-l-2 border-gray-200 pl-3">
-            "{review.summary}"
+          <p className="text-sm text-muted-foreground italic border-l-2 border-primary/40 pl-3">
+            &ldquo;{review.summary}&rdquo;
           </p>
         )}
 
         {/* Transcript (all plans) */}
         {review.transcript && (
-          <p className="text-xs text-gray-400 line-clamp-2 flex gap-1.5">
+          <p className="text-xs text-muted-foreground/70 line-clamp-2 flex gap-1.5">
             <FileText size={12} className="shrink-0 mt-0.5" />
             {review.transcript}
           </p>
@@ -104,9 +104,9 @@ export function ReviewCard({ review, plan }: ReviewCardProps) {
                 {Object.entries(raw)
                   .filter(([k]) => !["rating","sentiment","likelyReturnRate","issueFlag","summary"].includes(k))
                   .map(([k, v]) => (
-                    <div key={k} className="bg-gray-50 rounded-md px-2.5 py-1.5 border">
-                      <p className="text-xs text-gray-400 capitalize">{k.replace(/([A-Z])/g, " $1")}</p>
-                      <p className="text-sm font-medium text-gray-700">{String(v)}</p>
+                    <div key={k} className="bg-secondary rounded-md px-2.5 py-1.5 border">
+                      <p className="text-xs text-muted-foreground/70 capitalize">{k.replace(/([A-Z])/g, " $1")}</p>
+                      <p className="text-sm font-medium text-foreground">{String(v)}</p>
                     </div>
                   ))}
               </div>

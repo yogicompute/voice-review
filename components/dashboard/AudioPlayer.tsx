@@ -57,25 +57,25 @@ export function AudioPlayer({ url, duration = 0, className }: AudioPlayerProps) 
   const progress = total > 0 ? (current / total) * 100 : 0;
 
   return (
-    <div className={cn("flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2 border", className)}>
+    <div className={cn("flex items-center gap-3 rounded-lg border bg-secondary px-3 py-2", className)}>
       <audio ref={audioRef} src={url} preload="metadata" />
 
       {/* Play/pause */}
       <button
         onClick={togglePlay}
-        className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center shrink-0 hover:bg-violet-700 transition-colors"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
       >
         {playing
-          ? <Pause size={13} className="text-white" />
-          : <Play  size={13} className="text-white ml-0.5" />
+          ? <Pause size={13} />
+          : <Play  size={13} className="ml-0.5" />
         }
       </button>
 
       {/* Progress */}
       <div className="flex-1 space-y-1">
-        <div className="relative h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div className="relative h-1.5 overflow-hidden rounded-full bg-border">
           <div
-            className="absolute left-0 top-0 h-full bg-violet-500 rounded-full transition-all"
+            className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all"
             style={{ width: `${progress}%` }}
           />
           <input
@@ -88,13 +88,13 @@ export function AudioPlayer({ url, duration = 0, className }: AudioPlayerProps) 
             className="absolute inset-0 w-full opacity-0 cursor-pointer"
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-400 tabular-nums">
+        <div className="flex justify-between text-xs text-muted-foreground/70 tabular-nums">
           <span>{fmt(current)}</span>
           <span>{fmt(total)}</span>
         </div>
       </div>
 
-      <Volume2 size={14} className="text-gray-400 shrink-0" />
+      <Volume2 size={14} className="text-muted-foreground/70 shrink-0" />
     </div>
   );
 }

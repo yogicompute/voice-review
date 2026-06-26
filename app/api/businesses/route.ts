@@ -6,8 +6,13 @@ import { z } from "zod";
 import { nanoid } from "nanoid";
 
 const createSchema = z.object({
-  name: z.string().min(2).max(80),
-  category: z.string().optional(),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Business name must be at least 2 characters")
+    .max(80)
+    .regex(/^[A-Za-z][A-Za-z ]*$/, "Business name can only contain letters and spaces"),
+  category: z.string().trim().min(2, "Category is required").max(50),
   logoUrl: z.string().url().optional(),
 });
 
@@ -56,14 +61,19 @@ export async function POST(req: Request) {
   const body = await req.json();
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    const message = parsed.error.issues[0]?.message ?? "Invalid input";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const slug = `${parsed.data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${nanoid(6)}`;
+  // Capitalize the first letter of the business name (rest left as typed)
+  const trimmedName = parsed.data.name.trim();
+  const name = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
+
+  const slug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${nanoid(6)}`;
 
   const [business] = await db
     .insert(businesses)
-    .values({ ...parsed.data, userId: user.id, slug })
+    .values({ ...parsed.data, name, userId: user.id, slug })
     .returning();
 
   return NextResponse.json(business, { status: 201 });

@@ -21,7 +21,7 @@ export default async function BusinessesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">Businesses</h2>
-          <p className="text-gray-500 mt-1">Manage your registered businesses.</p>
+          <p className="text-muted-foreground mt-1">Manage your registered businesses.</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/businesses/new">
@@ -33,10 +33,10 @@ export default async function BusinessesPage() {
       {list.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
-            <Building2 size={40} className="text-gray-300" />
+            <Building2 size={40} className="text-muted-foreground/40" />
             <div className="text-center">
-              <p className="font-medium text-gray-700">No businesses registered</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="font-medium text-foreground">No businesses registered</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
                 Add one to get your API key and start collecting voice reviews.
               </p>
             </div>
@@ -52,19 +52,19 @@ export default async function BusinessesPage() {
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardContent className="flex items-center justify-between py-4 px-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Building2 size={18} className="text-gray-500" />
+                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                      <Building2 size={18} className="text-muted-foreground" />
                     </div>
                     <div>
                       <p className="font-medium">{biz.name}</p>
-                      <p className="text-sm text-gray-400">{biz.category ?? "No category"}</p>
+                      <p className="text-sm text-muted-foreground/70">{biz.category ?? "No category"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge variant={biz.isActive ? "default" : "secondary"}>
                       {biz.isActive ? "Active" : "Inactive"}
                     </Badge>
-                    <ChevronRight size={16} className="text-gray-400" />
+                    <ChevronRight size={16} className="text-muted-foreground/70" />
                   </div>
                 </CardContent>
               </Card>

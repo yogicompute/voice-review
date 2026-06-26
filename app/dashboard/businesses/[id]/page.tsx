@@ -42,12 +42,12 @@ export default async function BusinessDetailPage({
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-            <Building2 size={18} className="text-gray-500" />
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+            <Building2 size={18} className="text-muted-foreground" />
           </div>
           <div>
             <h2 className="text-2xl font-semibold">{business.name}</h2>
-            <p className="text-gray-400 text-sm">
+            <p className="text-muted-foreground/70 text-sm">
               {business.category ?? "No category"}
             </p>
           </div>
@@ -69,11 +69,11 @@ export default async function BusinessDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               API Key
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-gray-50 border rounded-md px-3 py-2 text-sm font-mono truncate">
+              <code className="flex-1 bg-secondary border rounded-md px-3 py-2 text-sm font-mono truncate">
                 {business.apiKey}
               </code>
               <CopyButton text={business.apiKey} />
@@ -81,11 +81,11 @@ export default async function BusinessDetailPage({
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Business ID
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-gray-50 border rounded-md px-3 py-2 text-sm font-mono truncate">
+              <code className="flex-1 bg-secondary border rounded-md px-3 py-2 text-sm font-mono truncate">
                 {business.id}
               </code>
               <CopyButton text={business.id} />
@@ -104,7 +104,7 @@ export default async function BusinessDetailPage({
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 text-sm overflow-x-auto font-mono leading-relaxed">
+            <pre className="bg-[#0d1117] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm overflow-x-auto font-mono leading-relaxed">
               {snippet}
             </pre>
             <div className="absolute top-3 right-3">

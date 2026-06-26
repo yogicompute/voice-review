@@ -11,10 +11,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const COLORS: Record<string, string> = {
-  superhappy: "#7c3aed",
-  happy:      "#10b981",
-  neutral:    "#6b7280",
-  sad:        "#3b82f6",
+  superhappy: "#059669",
+  happy:      "#34d399",
+  neutral:    "#94a3b8",
+  sad:        "#38bdf8",
   angry:      "#ef4444",
 };
 
@@ -37,11 +37,11 @@ export function SentimentChart({ data }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-500">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             Sentiment breakdown
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40 text-gray-300 text-sm">
+        <CardContent className="flex items-center justify-center h-40 text-muted-foreground/40 text-sm">
           Not enough data yet
         </CardContent>
       </Card>
@@ -53,7 +53,7 @@ export function SentimentChart({ data }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-gray-500">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
           Sentiment breakdown (last 30 days)
         </CardTitle>
       </CardHeader>

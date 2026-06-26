@@ -1,6 +1,8 @@
 import { getDbUser } from "@/lib/auth";
-import { db, businesses, reviews, subscriptions } from "@/lib/db";
-import { eq, and, desc, count } from "drizzle-orm";
+import { db, businesses, reviews, subscriptions, sentimentEnum } from "@/lib/db";
+import { eq, and, desc, count, type SQL } from "drizzle-orm";
+
+type Sentiment = (typeof sentimentEnum.enumValues)[number];
 import { notFound } from "next/navigation";
 import { ReviewCard } from "@/components/dashboard/ReviewCard";
 import { ReviewFilters } from "@/components/dashboard/ReviewFilters";
@@ -42,8 +44,8 @@ export default async function BusinessReviewsPage({
   const page = parseInt(sp.page ?? "1");
   const offset = (page - 1) * LIMIT;
 
-  const filters: any[] = [eq(reviews.businessId, id)];
-  if (sp.sentiment) filters.push(eq(reviews.sentiment, sp.sentiment as any));
+  const filters: SQL[] = [eq(reviews.businessId, id)];
+  if (sp.sentiment) filters.push(eq(reviews.sentiment, sp.sentiment as Sentiment));
   if (sp.issueOnly === "true") filters.push(eq(reviews.issueFlag, true));
   const where = and(...filters);
 
@@ -70,7 +72,7 @@ export default async function BusinessReviewsPage({
           </Button>
           <div>
             <h2 className="text-2xl font-semibold">{business.name}</h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               {total} review{total !== 1 ? "s" : ""}
               {sp.sentiment || sp.issueOnly ? " (filtered)" : ""}
             </p>
@@ -85,10 +87,10 @@ export default async function BusinessReviewsPage({
       {list.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
-            <Mic size={36} className="text-gray-300" />
+            <Mic size={36} className="text-muted-foreground/40" />
             <div className="text-center">
-              <p className="font-medium text-gray-700">No reviews yet</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="font-medium text-foreground">No reviews yet</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
                 {sp.sentiment || sp.issueOnly
                   ? "No reviews match this filter."
                   : "Add the SDK button to your app to start collecting voice reviews."}
