@@ -37,12 +37,12 @@ export function QrCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-          <div className="rounded-xl border border-border bg-white p-3">
+          <div className="shrink-0 rounded-xl border border-border bg-white p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={dataUrl} alt="QR code" width={176} height={176} className="size-44" />
           </div>
 
-          <div className="flex-1 space-y-3">
+          <div className="min-w-0 flex-1 space-y-3">
             <div className="space-y-1.5">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Public link

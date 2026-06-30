@@ -33,12 +33,15 @@ interface BusinessLite {
 export function DigestPanel({
   business,
   latest,
+  reviewCount,
   ownerEmail,
 }: {
   business: BusinessLite;
   latest: Digest | null;
+  reviewCount: number;
   ownerEmail: string;
 }) {
+  const noReviews = reviewCount === 0;
   const router = useRouter();
   const [busy, setBusy] = useState<"gen" | "send" | "save" | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -145,7 +148,12 @@ export function DigestPanel({
             >
               <Settings2 size={15} />
             </Button>
-            <Button size="sm" onClick={generate} disabled={busy !== null}>
+            <Button
+              size="sm"
+              onClick={generate}
+              disabled={busy !== null || noReviews}
+              title={noReviews ? "No reviews yet" : undefined}
+            >
               {busy === "gen" ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
               {latest ? "Regenerate" : "Generate now"}
             </Button>
@@ -208,7 +216,8 @@ export function DigestPanel({
               variant="outline"
               size="sm"
               onClick={emailLatest}
-              disabled={busy !== null}
+              disabled={busy !== null || noReviews}
+              title={noReviews ? "No reviews yet" : undefined}
             >
               {busy === "send" ? <Loader2 size={14} className="animate-spin" /> : null}
               Email me this digest
@@ -217,9 +226,17 @@ export function DigestPanel({
         ) : (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border px-4 py-8 text-center">
             <p className="text-sm text-muted-foreground">
-              Generate your first weekly digest to see top complaints, praise, and a recommended action.
+              {noReviews
+                ? "No reviews yet — collect at least one voice review to generate a digest."
+                : "Generate your first weekly digest to see top complaints, praise, and a recommended action."}
             </p>
-            <Button variant="outline" size="sm" onClick={emailLatest} disabled={busy !== null}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={emailLatest}
+              disabled={busy !== null || noReviews}
+              title={noReviews ? "No reviews yet" : undefined}
+            >
               {busy === "send" ? <Loader2 size={14} className="animate-spin" /> : null}
               Generate &amp; email me
             </Button>

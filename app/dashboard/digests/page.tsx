@@ -1,6 +1,6 @@
 import { getDbUser } from "@/lib/auth";
-import { db, businesses, digests } from "@/lib/db";
-import { eq, desc } from "drizzle-orm";
+import { db, businesses, digests, reviews } from "@/lib/db";
+import { eq, desc, count } from "drizzle-orm";
 import { DigestPanel } from "@/components/dashboard/DigestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,16 @@ export default async function DigestsPage() {
         where: eq(digests.businessId, b.id),
         orderBy: desc(digests.createdAt),
       }),
+    ),
+  );
+
+  const reviewCounts = await Promise.all(
+    list.map((b) =>
+      db
+        .select({ value: count() })
+        .from(reviews)
+        .where(eq(reviews.businessId, b.id))
+        .then((r) => r[0]?.value ?? 0),
     ),
   );
 
@@ -64,6 +74,7 @@ export default async function DigestsPage() {
                 digestEmail: b.digestEmail,
               }}
               latest={latestPerBusiness[i] ?? null}
+              reviewCount={reviewCounts[i]}
               ownerEmail={user.email}
             />
           ))}
