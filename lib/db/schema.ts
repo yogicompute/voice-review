@@ -73,6 +73,9 @@ export const businesses = pgTable(
       .notNull()
       .$defaultFn(() => nanoid(48)),
     isActive: boolean("is_active").notNull().default(true),
+    // Weekly AI digest settings
+    digestEnabled: boolean("digest_enabled").notNull().default(true),
+    digestEmail: text("digest_email"),               // override; falls back to owner email
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -120,6 +123,48 @@ export const reviews = pgTable(
   })
 );
 
+// ── Digests ────────────────────────────────────────────────────────────
+// Stored weekly AI "voice of customer" summaries per business.
+export const digests = pgTable(
+  "digests",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    businessId: text("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+
+    // Headline metrics
+    totalReviews: integer("total_reviews").notNull().default(0),
+    prevTotalReviews: integer("prev_total_reviews").notNull().default(0),
+    avgRating: real("avg_rating").notNull().default(0),
+    sentimentScore: real("sentiment_score").notNull().default(0),   // 0–100
+    sentimentDelta: real("sentiment_delta").notNull().default(0),   // vs prev week
+    issueCount: integer("issue_count").notNull().default(0),
+
+    // AI-derived narrative
+    headline: text("headline"),
+    topComplaint: text("top_complaint"),
+    topComplaintMentions: integer("top_complaint_mentions").default(0),
+    topPraise: text("top_praise"),
+    topPraiseMentions: integer("top_praise_mentions").default(0),
+    recommendation: text("recommendation"),
+    retentionLift: integer("retention_lift").default(0),            // estimated %
+
+    deliveredEmail: boolean("delivered_email").notNull().default(false),
+
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    businessIdIdx: index("digests_business_id_idx").on(t.businessId),
+    createdAtIdx: index("digests_created_at_idx").on(t.createdAt),
+  }),
+);
+
 // ── Subscriptions ──────────────────────────────────────────────────────
 // Tracks plan limits per user. Updated by billing webhook.
 export const subscriptions = pgTable("subscriptions", {
@@ -162,6 +207,14 @@ export const businessesRelations = relations(businesses, ({ one, many }) => ({
     references: [users.id],
   }),
   reviews: many(reviews),
+  digests: many(digests),
+}));
+
+export const digestsRelations = relations(digests, ({ one }) => ({
+  business: one(businesses, {
+    fields: [digests.businessId],
+    references: [businesses.id],
+  }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -186,3 +239,5 @@ export type NewBusiness = typeof businesses.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
 export type NewReview = typeof reviews.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
+export type Digest = typeof digests.$inferSelect;
+export type NewDigest = typeof digests.$inferInsert;

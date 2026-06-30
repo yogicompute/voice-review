@@ -2,25 +2,24 @@
 
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label="Toggle theme"
       suppressHydrationWarning
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={cn(
-        "flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-        className,
-      )}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      className={className}
     >
-      <Sun size={17} className="hidden dark:block" />
-      <Moon size={17} className="block dark:hidden" />
-    </button>
+      {/* Icon is driven by the .dark class so there's no hydration flash */}
+      <Sun size={18} className="hidden dark:block" />
+      <Moon size={18} className="block dark:hidden" />
+    </Button>
   );
 }

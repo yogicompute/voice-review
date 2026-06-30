@@ -15,6 +15,13 @@
       "when": 1782497896346,
       "tag": "0001_warm_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782838209393,
+      "tag": "0002_cloudy_stryfe",
+      "breakpoints": true
     }
   ]
 }
