@@ -5,6 +5,8 @@ import { validateApiKey } from "@/lib/validateApiKeys";
 import { uploadAudio } from "@/lib/cloudinary";
 import { transcribeAudio } from "@/lib/ai/transcribe";
 import { analyzeReview } from "@/lib/ai/gemini";
+import { QUEUE_ENABLED } from "@/lib/flags";
+import { inngest } from "@/lib/inngest/client";
 
 export const maxDuration = 30; // Vercel: allow up to 30s for AI calls
 
@@ -94,6 +96,24 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error("Cloudinary upload failed:", err);
       // Continue even if upload fails — we still transcribe + analyze
+    }
+
+    // ── 5b. Queue mode: enqueue a background job and return early ─────
+    if (QUEUE_ENABLED) {
+      await db
+        .update(reviews)
+        .set({ audioUrl, audioDuration })
+        .where(eq(reviews.id, review.id));
+
+      await inngest.send({
+        name: "review/created",
+        data: { reviewId: review.id, businessId: business.id, audioUrl },
+      });
+
+      return NextResponse.json(
+        { reviewId: review.id, status: "processing" },
+        { status: 202 },
+      );
     }
 
     // ── 6. Transcribe with Groq Whisper ──────────────────────────────

@@ -12,6 +12,7 @@ export interface VoiceReviewButtonProps {
   maxDuration?: number;        // seconds, default 30
   onSuccess?: (result: ReviewResult) => void;
   onError?: (error: string) => void;
+  showResultCard?: boolean;    // show the built-in metrics card (default true)
   className?: string;
   style?: React.CSSProperties;
   theme?: {
@@ -63,6 +64,7 @@ export function VoiceReviewButton({
   maxDuration = 30,
   onSuccess,
   onError,
+  showResultCard = true,
   className = "",
   style = {},
   theme = {},
@@ -174,8 +176,8 @@ export function VoiceReviewButton({
       setResult(data);
       setStage("success");
       onSuccess?.(data);
-    } catch (err: any) {
-      const msg = err.message ?? "Something went wrong";
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong";
       setErrorMsg(msg);
       setStage("error");
       onError?.(msg);
@@ -325,7 +327,9 @@ export function VoiceReviewButton({
               {l.success}
             </p>
 
-            {/* Metrics card */}
+            {/* Metrics card — only when enabled AND analysis is available
+                (inline mode). In async/queue mode the host app shows results. */}
+            {showResultCard && typeof result.rating === "number" && result.rating > 0 && (
             <div
               style={{
                 background: "#f9fafb",
@@ -394,24 +398,27 @@ export function VoiceReviewButton({
               {/* Summary */}
               {result.summary && (
                 <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "8px" }}>
-                  "{result.summary}"
+                  &ldquo;{result.summary}&rdquo;
                 </p>
               )}
             </div>
+            )}
 
-            <button
-              onClick={handleClick}
-              style={{
-                fontSize: "13px",
-                color: "#6b7280",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                textDecoration: "underline",
-              }}
-            >
-              Leave another review
-            </button>
+            {showResultCard && (
+              <button
+                onClick={handleClick}
+                style={{
+                  fontSize: "13px",
+                  color: "#6b7280",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+              >
+                Leave another review
+              </button>
+            )}
           </div>
         )}
 

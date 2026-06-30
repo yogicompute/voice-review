@@ -1,7 +1,7 @@
 export const PLANS = {
   free: {
     label: "Free",
-    price: "$0/mo",
+    price: "₹0/mo",
     reviewsPerMonth: 50,
     audioAccess: false,
     advancedMetrics: false,
@@ -10,7 +10,7 @@ export const PLANS = {
   },
   pro: {
     label: "Pro",
-    price: "$19/mo",
+    price: "₹1999/mo",
     reviewsPerMonth: 500,
     audioAccess: true,
     advancedMetrics: true,
@@ -19,7 +19,7 @@ export const PLANS = {
   },
   business: {
     label: "Business",
-    price: "$49/mo",
+    price: "₹4999/mo",
     reviewsPerMonth: 5000,
     audioAccess: true,
     advancedMetrics: true,

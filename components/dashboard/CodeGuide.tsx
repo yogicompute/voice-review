@@ -67,7 +67,7 @@ export default function OrderConfirmation({ orderId }) {
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono">
+            <pre className="bg-[#0d1117] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono">
               {installSnippet}
             </pre>
             <div className="absolute top-3 right-3">
@@ -93,7 +93,7 @@ export default function OrderConfirmation({ orderId }) {
             post-service modal.
           </p>
           <div className="relative">
-            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
+            <pre className="bg-[#0d1117] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
               {basicSnippet}
             </pre>
             <div className="absolute top-3 right-3">
@@ -118,7 +118,7 @@ export default function OrderConfirmation({ orderId }) {
             Adjust colors, labels, max duration, and handle results in your own UI.
           </p>
           <div className="relative">
-            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
+            <pre className="bg-[#0d1117] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto leading-relaxed">
               {advancedSnippet}
             </pre>
             <div className="absolute top-3 right-3">
@@ -143,7 +143,7 @@ export default function OrderConfirmation({ orderId }) {
             Send audio as multipart/form-data to the endpoint with your API key header.
           </p>
           <div className="relative">
-            <pre className="bg-[#19232F] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto">
+            <pre className="bg-[#0d1117] text-slate-100 ring-1 ring-white/10 rounded-lg p-4 text-sm font-mono overflow-x-auto">
               {curlSnippet}
             </pre>
             <div className="absolute top-3 right-3">

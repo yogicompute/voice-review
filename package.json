@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:webhook":"ngrok http --url=swampless-veta-jurally.ngrok-free.dev 3000",
+    "dev:inngest": "npx inngest-cli@latest dev -u http://localhost:3000/api/inngest",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -21,6 +22,7 @@
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",
     "groq-sdk": "^1.2.1",
+    "inngest": "^3.27.0",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "next-themes": "^0.4.6",
