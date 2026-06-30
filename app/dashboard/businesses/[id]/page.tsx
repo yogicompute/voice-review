@@ -2,6 +2,7 @@ import { getDbUser } from "@/lib/auth";
 import { db, businesses } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import QRCode from "qrcode";
 import {
   Card,
   CardContent,
@@ -12,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/dashboard/CopyButton";
+import { QrCard } from "@/components/dashboard/QrCard";
 import { Building2, Key, ExternalLink } from "lucide-react";
 import { BarChart2 } from "lucide-react";
 import Link from "next/link";
@@ -30,6 +32,14 @@ export default async function BusinessDetailPage({
   });
 
   if (!business) notFound();
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const reviewUrl = `${appUrl}/r/${business.slug}`;
+  const qrDataUrl = await QRCode.toDataURL(reviewUrl, {
+    width: 512,
+    margin: 2,
+    color: { dark: "#0f172a", light: "#ffffff" },
+  });
 
   const snippet = `import { VoiceReviewButton } from "@voicereview/sdk";
 
@@ -93,6 +103,9 @@ export default async function BusinessDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* QR review page */}
+      <QrCard url={reviewUrl} dataUrl={qrDataUrl} businessName={business.name} />
 
       {/* Code snippet */}
       <Card>
