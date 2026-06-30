@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:webhook":"ngrok http --url=swampless-veta-jurally.ngrok-free.dev 3000",
+    "dev:webhook": "ngrok http --url=swampless-veta-jurally.ngrok-free.dev 3000",
     "dev:inngest": "npx inngest-cli@latest dev -u http://localhost:3000/api/inngest",
     "build": "next build",
     "start": "next start",
@@ -31,6 +31,7 @@
     "react-audio-voice-recorder": "^2.2.0",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
+    "resend": "^4.8.0",
     "shadcn": "^4.11.0",
     "svix": "^1.96.0",
     "tailwind-merge": "^3.6.0",

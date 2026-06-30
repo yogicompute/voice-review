@@ -7,6 +7,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Building2,
+  Sparkles,
   CreditCard,
   BookOpen,
   Menu,
@@ -19,6 +20,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/businesses", label: "Businesses", icon: Building2 },
+  { href: "/dashboard/digests", label: "Digests", icon: Sparkles },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/getting-started", label: "Setup guide", icon: BookOpen },
 ];
