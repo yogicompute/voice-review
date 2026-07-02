@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/inngest(.*)",
   "/api/digests/run",
   "/r/(.*)",
+  "/s/(.*)",
   "/test-button(.*)",
 ]);
 

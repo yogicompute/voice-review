@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Building2,
   Sparkles,
+  Share2,
   CreditCard,
   BookOpen,
   Menu,
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/businesses", label: "Businesses", icon: Building2 },
   { href: "/dashboard/digests", label: "Digests", icon: Sparkles },
+  { href: "/dashboard/moments", label: "Moments", icon: Share2 },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/getting-started", label: "Setup guide", icon: BookOpen },
 ];
@@ -60,8 +62,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 function Brand() {
   return (
     <Link href="/dashboard" className="flex items-center gap-2.5 px-1">
-      <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-        <Mic size={18} />
+      <span className="flex size-11 p-1 items-center justify-center rounded-xl bg-white text-primary-foreground shadow-sm">
+        <img src="/icon.png" alt="icon" />
       </span>
       <span className="flex flex-col leading-none">
         <span className="text-[15px] font-semibold tracking-tight">VoiceReview</span>

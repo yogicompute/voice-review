@@ -5,9 +5,11 @@ import { AudioPlayer } from "./AudioPlayer";
 import { UpgradePrompt } from "./UpgradePrompt";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle, RotateCcw, User, FileText } from "lucide-react";
+import { AlertTriangle, RotateCcw, User, FileText, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 import { PlanKey, canAccessAudio, canAccessAdvancedMetrics } from "@/lib/plans";
+import { isGlowingReview } from "@/lib/share";
 
 interface ReviewCardProps {
   review: Review;
@@ -37,6 +39,15 @@ export function ReviewCard({ review, plan }: ReviewCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {isGlowingReview(review) && (
+              <Link
+                href={`/s/${review.id}`}
+                target="_blank"
+                className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-accent px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              >
+                <Share2 size={11} /> Share
+              </Link>
+            )}
             {review.issueFlag && (
               <Badge variant="destructive" className="text-xs gap-1">
                 <AlertTriangle size={10} /> Issue
