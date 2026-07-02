@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Mic, MicOff, Loader2, CheckCircle, XCircle, Star } from "lucide-react";
+import { Mic, MicOff, Loader2, CheckCircle, XCircle } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────
 export interface VoiceReviewButtonProps {
@@ -46,15 +46,6 @@ type Stage =
   | "success"
   | "error";
 
-// ── Sentiment emoji map ────────────────────────────────────────────────
-const SENTIMENT_EMOJI: Record<string, string> = {
-  superhappy: "🤩",
-  happy: "😊",
-  neutral: "😐",
-  sad: "😔",
-  angry: "😠",
-};
-
 // The VoiceReview API base URL, baked in at build time from your app's
 // NEXT_PUBLIC_APP_URL (see tsup.config.ts). This makes the SDK always post to
 // YOUR domain, no matter which site it's embedded on. Falls back to the host
@@ -73,7 +64,6 @@ export function VoiceReviewButton({
   maxDuration = 30,
   onSuccess,
   onError,
-  showResultCard = true,
   className = "",
   style = {},
   theme = {},
@@ -326,108 +316,18 @@ export function VoiceReviewButton({
         )}
 
         {/* ── Success ── */}
-        {stage === "success" && result && (
-          <div style={{ textAlign: "center" }}>
+        {stage === "success" && (
+          <div style={{ textAlign: "center", padding: "8px 0" }}>
             <CheckCircle
-              size={32}
-              style={{ color: "#10b981", margin: "0 auto 10px", display: "block" }}
+              size={40}
+              style={{ color: "#10b981", margin: "0 auto 12px", display: "block" }}
             />
-            <p style={{ fontSize: "14px", fontWeight: 600, color: t.text, marginBottom: "14px" }}>
+            <p style={{ fontSize: "16px", fontWeight: 700, color: t.text, marginBottom: "4px" }}>
               {l.success}
             </p>
-
-            {/* Metrics card — only when enabled AND analysis is available
-                (inline mode). In async/queue mode the host app shows results. */}
-            {showResultCard && typeof result.rating === "number" && result.rating > 0 && (
-            <div
-              style={{
-                background: "#f9fafb",
-                borderRadius: "8px",
-                padding: "12px",
-                marginBottom: "14px",
-                textAlign: "left",
-              }}
-            >
-              {/* Stars */}
-              <div style={{ display: "flex", gap: "2px", marginBottom: "8px" }}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    size={16}
-                    style={{
-                      color: i < result.rating ? "#f59e0b" : "#d1d5db",
-                      fill: i < result.rating ? "#f59e0b" : "none",
-                    }}
-                  />
-                ))}
-                <span style={{ fontSize: "12px", color: "#6b7280", marginLeft: "6px" }}>
-                  {result.rating}/5
-                </span>
-              </div>
-
-              {/* Sentiment + return rate */}
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    background: "#ede9fe",
-                    color: "#7c3aed",
-                    padding: "2px 8px",
-                    borderRadius: "999px",
-                  }}
-                >
-                  {SENTIMENT_EMOJI[result.sentiment]} {result.sentiment}
-                </span>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    background: "#d1fae5",
-                    color: "#065f46",
-                    padding: "2px 8px",
-                    borderRadius: "999px",
-                  }}
-                >
-                  {result.likelyReturnRate}% likely to return
-                </span>
-                {result.issueFlag && (
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      background: "#fee2e2",
-                      color: "#991b1b",
-                      padding: "2px 8px",
-                      borderRadius: "999px",
-                    }}
-                  >
-                    ⚠️ issue flagged
-                  </span>
-                )}
-              </div>
-
-              {/* Summary */}
-              {result.summary && (
-                <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "8px" }}>
-                  &ldquo;{result.summary}&rdquo;
-                </p>
-              )}
-            </div>
-            )}
-
-            {showResultCard && (
-              <button
-                onClick={handleClick}
-                style={{
-                  fontSize: "13px",
-                  color: "#6b7280",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-              >
-                Leave another review
-              </button>
-            )}
+            <p style={{ fontSize: "13px", color: "#6b7280" }}>
+              We appreciate you taking the time.
+            </p>
           </div>
         )}
 

@@ -1,5 +1,5 @@
-import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
+import { eq, and, gte, count } from "drizzle-orm";
+import { NextResponse, after } from "next/server";
 import { db, reviews } from "@/lib/db";
 import { validateApiKey } from "@/lib/validateApiKeys";
 import { uploadAudio } from "@/lib/cloudinary";
@@ -33,175 +33,132 @@ export async function POST(req: Request) {
   return withCors(await handlePost(req));
 }
 
+
 async function handlePost(req: Request): Promise<NextResponse> {
   try {
-    // ── 1. Auth via API key ──────────────────────────────────────────
     const apiKey = req.headers.get("x-api-key");
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "Missing x-api-key header" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Missing x-api-key header" }, { status: 401 });
     }
 
-    const business = await validateApiKey(apiKey);
+    // ── 1. Auth + body parse in parallel ─────────────────────────────
+    const [business, formData] = await Promise.all([
+      validateApiKey(apiKey),
+      req.formData(),
+    ]);
+
     if (!business) {
-      return NextResponse.json(
-        { error: "Invalid or inactive API key" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Invalid or inactive API key" }, { status: 401 });
     }
 
-    // ── 2. Plan: check monthly review limit ──────────────────────────
-    const sub = business.user?.subscription;
-    const limit = sub?.reviewsPerMonth ?? 50;
-
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const recentReviews = await db.query.reviews.findMany({
-      where: (r, { eq, and, gte }) =>
-        and(eq(r.businessId, business.id), gte(r.createdAt, startOfMonth)),
-    });
-
-    if (recentReviews.length >= limit) {
-      return NextResponse.json(
-        {
-          error: `Monthly review limit of ${limit} reached. Upgrade your plan.`,
-        },
-        { status: 429 },
-      );
-    }
-
-    // ── 3. Parse multipart form data ─────────────────────────────────
-    const formData = await req.formData();
     const audioFile = formData.get("audio") as File | null;
     const customerRef = formData.get("customerRef") as string | null;
 
     if (!audioFile) {
-      return NextResponse.json(
-        { error: "Missing audio file" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing audio file" }, { status: 400 });
     }
-
-    // Max 5MB guard
     if (audioFile.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "Audio file too large (max 5MB)" }, { status: 400 });
+    }
+
+    // ── 2. Plan limit check (single remaining awaited DB query) ──────
+    const limit = business.user?.subscription?.reviewsPerMonth ?? 50;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [{ value: monthCount }] = await db
+      .select({ value: count() })
+      .from(reviews)
+      .where(and(eq(reviews.businessId, business.id), gte(reviews.createdAt, startOfMonth)));
+
+    if (monthCount >= limit) {
       return NextResponse.json(
-        { error: "Audio file too large (max 5MB)" },
-        { status: 400 },
+        { error: `Monthly review limit of ${limit} reached. Upgrade your plan.` },
+        { status: 429 },
       );
     }
 
-    // ── 4. Create a processing placeholder row immediately ───────────
-    const [review] = await db
-      .insert(reviews)
-      .values({
-        businessId: business.id,
-        status: "processing",
-        customerRef: customerRef ?? null,
-      })
-      .returning();
+    // ── 3. Generate ID here; do NOT insert yet ───────────────────────
+    const reviewId = crypto.randomUUID();
 
-    // ── 5. Upload audio to Cloudinary ────────────────────────────────
+    // Buffer is already in memory after formData(); this is cheap.
     const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
 
-    let audioUrl: string | null = null;
-    let audioDuration: number | null = null;
+    // ── 4. Everything else, including the insert, runs in background ─
+    after(async () => {
+      try {
+        // Insert placeholder row first so status polling works ASAP
+        await db.insert(reviews).values({
+          id: reviewId,
+          businessId: business.id,
+          status: "processing",
+          customerRef: customerRef ?? null,
+        });
 
-    try {
-      const uploaded = await uploadAudio(
-        audioBuffer,
-        `voicereview/${business.id}`,
-      );
-      audioUrl = uploaded.url;
-      audioDuration = uploaded.duration;
-    } catch (err) {
-      console.error("Cloudinary upload failed:", err);
-      // Continue even if upload fails — we still transcribe + analyze
-    }
+        let audioUrl: string | null = null;
+        try {
+          const uploaded = await uploadAudio(audioBuffer, `voicereview/${business.id}`);
+          audioUrl = uploaded.url;
+          await db
+            .update(reviews)
+            .set({ audioUrl, audioDuration: uploaded.duration })
+            .where(eq(reviews.id, reviewId));
+        } catch (err) {
+          console.error("Cloudinary upload failed:", err);
+        }
 
-    // ── 5b. Queue mode: enqueue a background job and return early ─────
-    if (QUEUE_ENABLED) {
-      await db
-        .update(reviews)
-        .set({ audioUrl, audioDuration })
-        .where(eq(reviews.id, review.id));
+        if (QUEUE_ENABLED) {
+          await inngest.send({
+            name: "review/created",
+            data: { reviewId, businessId: business.id, audioUrl },
+          });
+          return;
+        }
 
-      await inngest.send({
-        name: "review/created",
-        data: { reviewId: review.id, businessId: business.id, audioUrl },
-      });
+        let transcript = "";
+        try {
+          transcript = await transcribeAudio(audioBuffer);
+        } catch (err) {
+          console.error("❌ Transcription failed:", err);
+        }
 
-      return NextResponse.json(
-        { reviewId: review.id, status: "processing" },
-        { status: 202 },
-      );
-    }
+        let metrics = {
+          rating: 3,
+          sentiment: "neutral",
+          likelyReturnRate: 50,
+          issueFlag: false,
+          summary: "Could not analyze feedback",
+        };
+        try {
+          metrics = await analyzeReview(transcript);
+        } catch (err) {
+          console.error("❌ Gemini analysis failed:", err);
+        }
 
-    // ── 6. Transcribe with Groq Whisper ──────────────────────────────
-    let transcript = "";
-    try {
-      transcript = await transcribeAudio(audioBuffer);
-      console.log("✅ Transcript:", transcript); // add this
-    } catch (err) {
-      console.error("❌ Transcription failed:", err); // already there
-    }
-
-    // ── 7. Analyze with Gemini Flash ─────────────────────────────────
-    let metrics = {
-      rating: 3,
-      sentiment: "neutral",
-      likelyReturnRate: 50,
-      issueFlag: false,
-      summary: "Could not analyze feedback",
-    };
-
-    console.log("Sending to Gemini, transcript length:", transcript.length); // add this
-    try {
-      metrics = await analyzeReview(transcript);
-      console.log("✅ Gemini metrics:", metrics); // add this
-    } catch (err) {
-      console.error("❌ Gemini analysis failed:", err);
-    }
-
-    // ── 8. Update review row with all results ────────────────────────
-    const [completed] = await db
-      .update(reviews)
-      .set({
-        status: "completed",
-        audioUrl,
-        audioDuration,
-        transcript,
-        rating: metrics.rating,
-        sentiment: metrics.sentiment as
-          | "superhappy"
-          | "happy"
-          | "neutral"
-          | "sad"
-          | "angry",
-        likelyReturnRate: metrics.likelyReturnRate,
-        issueFlag: metrics.issueFlag,
-        summary: metrics.summary,
-        rawMetrics: JSON.stringify(metrics),
-      })
-      .where(eq(reviews.id, review.id))
-      .returning();
-
-    // ── 9. Return result to SDK ───────────────────────────────────────
-    return NextResponse.json({
-      reviewId: completed.id,
-      rating: completed.rating,
-      sentiment: completed.sentiment,
-      likelyReturnRate: completed.likelyReturnRate,
-      issueFlag: completed.issueFlag,
-      summary: completed.summary,
+        await db
+          .update(reviews)
+          .set({
+            status: "completed",
+            transcript,
+            rating: metrics.rating,
+            sentiment: metrics.sentiment as
+              | "superhappy" | "happy" | "neutral" | "sad" | "angry",
+            likelyReturnRate: metrics.likelyReturnRate,
+            issueFlag: metrics.issueFlag,
+            summary: metrics.summary,
+            rawMetrics: JSON.stringify(metrics),
+          })
+          .where(eq(reviews.id, reviewId));
+      } catch (err) {
+        console.error("Background review processing failed:", err);
+        await db.update(reviews).set({ status: "failed" }).where(eq(reviews.id, reviewId));
+      }
     });
+
+    // ── 5. Respond immediately ───────────────────────────────────────
+    return NextResponse.json({ reviewId, status: "processing" }, { status: 202 });
   } catch (err) {
     console.error("Review endpoint error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
