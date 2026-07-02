@@ -30,5 +30,10 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "sdk/tsup.config.ts",
+    "sdk/dist",
+    "sdk/node_modules"
+  ]
 }
