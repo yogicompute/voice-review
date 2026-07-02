@@ -10,7 +10,30 @@ import { inngest } from "@/lib/inngest/client";
 
 export const maxDuration = 30; // Vercel: allow up to 30s for AI calls
 
+// The SDK is embedded on other businesses' sites, so browsers make a
+// cross-origin request here. Allow it (the API key in the header is the auth).
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "content-type, x-api-key",
+  "Access-Control-Max-Age": "86400",
+};
+
+function withCors(res: NextResponse): NextResponse {
+  for (const [k, v] of Object.entries(CORS_HEADERS)) res.headers.set(k, v);
+  return res;
+}
+
+// Preflight (browsers send OPTIONS before a POST with custom headers).
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(req: Request) {
+  return withCors(await handlePost(req));
+}
+
+async function handlePost(req: Request): Promise<NextResponse> {
   try {
     // ── 1. Auth via API key ──────────────────────────────────────────
     const apiKey = req.headers.get("x-api-key");
