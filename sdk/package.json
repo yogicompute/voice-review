@@ -1,10 +1,18 @@
 {
   "name": "@voicereview/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Drop-in voice review button for React — record, transcribe, and analyze customer feedback.",
   "license": "MIT",
-  "keywords": ["voice", "review", "feedback", "react", "sdk", "audio", "sentiment"],
+  "keywords": [
+    "voice",
+    "review",
+    "feedback",
+    "react",
+    "sdk",
+    "audio",
+    "sentiment"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,7 +28,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup index.ts --format esm,cjs --dts --external react --tsconfig tsconfig.json"
+    "build": "tsup"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -31,7 +39,8 @@
   "devDependencies": {
     "tsup": "^8",
     "typescript": "^5",
-    "react": "^19"
+    "react": "^19",
+    "dotenv": "^16.4.5"
   },
   "publishConfig": {
     "access": "public"

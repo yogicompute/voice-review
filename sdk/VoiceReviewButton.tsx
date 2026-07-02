@@ -55,12 +55,21 @@ const SENTIMENT_EMOJI: Record<string, string> = {
   angry: "😠",
 };
 
+// The VoiceReview API base URL, baked in at build time from your app's
+// NEXT_PUBLIC_APP_URL (see tsup.config.ts). This makes the SDK always post to
+// YOUR domain, no matter which site it's embedded on. Falls back to the host
+// page origin only if no base was configured at build time.
+const API_BASE = (process.env.VOICEREVIEW_API_BASE ?? "").replace(/\/+$/, "");
+const DEFAULT_ENDPOINT = API_BASE
+  ? `${API_BASE}/api/review`
+  : `${typeof window !== "undefined" ? window.location.origin : ""}/api/review`;
+
 // ── Main component ─────────────────────────────────────────────────────
 export function VoiceReviewButton({
   apiKey,
   businessId,
   customerRef,
-  endpoint = `${typeof window !== "undefined" ? window.location.origin : ""}/api/review`,
+  endpoint = DEFAULT_ENDPOINT,
   maxDuration = 30,
   onSuccess,
   onError,

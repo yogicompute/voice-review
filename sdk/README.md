@@ -27,7 +27,6 @@ export default function ThankYou({ orderId }: { orderId: string }) {
       apiKey="vr_live_xxxxxxxxxxxx"
       businessId="biz_xxxxxxxx"
       customerRef={orderId}
-      endpoint="https://your-voicereview-domain.com/api/review"
       onSuccess={(r) => console.log("Rating:", r.rating, "Sentiment:", r.sentiment)}
     />
   );
@@ -36,7 +35,7 @@ export default function ThankYou({ orderId }: { orderId: string }) {
 
 Grab your `apiKey` and `businessId` from your VoiceReview dashboard (Businesses → API credentials).
 
-> **Important:** if your site is on a different domain than your VoiceReview app, set `endpoint` to your hosted API URL. It defaults to `"<current-origin>/api/review"`, which only works when the button runs on the same domain as the VoiceReview app itself.
+> The SDK posts to the VoiceReview API automatically — the endpoint is baked into the package, so it works no matter what site it's embedded on. You only need the `endpoint` prop if you want to point it at a different (e.g. self-hosted) instance.
 
 ## Props
 
@@ -45,7 +44,7 @@ Grab your `apiKey` and `businessId` from your VoiceReview dashboard (Businesses 
 | `apiKey`         | `string` **(required)**                | —                               | Your publishable API key (`vr_live_…`). |
 | `businessId`     | `string` **(required)**                | —                               | The business the review belongs to. |
 | `customerRef`    | `string`                               | —                               | Opaque reference (order ID, table, etc.) saved on the review. |
-| `endpoint`       | `string`                               | `"<origin>/api/review"`         | Your VoiceReview API endpoint. Set this for cross-domain use. |
+| `endpoint`       | `string`                               | baked-in VoiceReview API        | Override only to target a different/self-hosted instance. |
 | `maxDuration`    | `number`                               | `30`                            | Max recording length in seconds. |
 | `showResultCard` | `boolean`                              | `true`                          | Show the built-in result card after submitting. |
 | `onSuccess`      | `(result: ReviewResult) => void`       | —                               | Called with the analyzed result. |
