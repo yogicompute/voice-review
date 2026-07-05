@@ -22,6 +22,27 @@
       "when": 1782838209393,
       "tag": "0002_cloudy_stryfe",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783275320534,
+      "tag": "0003_add_google_place_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783277388659,
+      "tag": "0004_review_page_theme",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783279337210,
+      "tag": "0005_default_brand_blue",
+      "breakpoints": true
     }
   ]
 }

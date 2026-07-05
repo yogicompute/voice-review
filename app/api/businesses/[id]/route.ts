@@ -9,6 +9,17 @@ const updateSchema = z.object({
   category: z.string().optional(),
   logoUrl: z.string().url().optional(),
   isActive: z.boolean().optional(),
+  // When present: empty string clears the Place ID (null), otherwise sets it.
+  // When absent from the request, the column is left untouched.
+  googlePlaceId: z.string().trim().max(255).optional(),
+  // Review page customization
+  reviewPageStyle: z.enum(["gradient", "solid"]).optional(),
+  reviewPageColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Color must be a hex value like #059669")
+    .optional(),
+  // Empty string clears the message (falls back to the default greeting).
+  reviewPageMessage: z.string().trim().max(120).optional(),
 });
 
 async function getOwnedBusiness(clerkId: string, bizId: string) {
@@ -45,9 +56,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
+  // Normalize explicitly-provided empty strings to null (clears the value).
+  const patch: Record<string, unknown> = { ...parsed.data, updatedAt: new Date() };
+  if ("googlePlaceId" in parsed.data) {
+    patch.googlePlaceId = parsed.data.googlePlaceId ? parsed.data.googlePlaceId : null;
+  }
+  if ("reviewPageMessage" in parsed.data) {
+    patch.reviewPageMessage = parsed.data.reviewPageMessage ? parsed.data.reviewPageMessage : null;
+  }
+
   const [updated] = await db
     .update(businesses)
-    .set({ ...parsed.data, updatedAt: new Date() })
+    .set(patch)
     .where(eq(businesses.id, id))
     .returning();
 

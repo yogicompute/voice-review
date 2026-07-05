@@ -65,6 +65,14 @@ export const businesses = pgTable(
     slug: text("slug").notNull().unique(),       // used in public-facing URLs
     category: text("category"),                  // e.g. "restaurant", "salon"
     logoUrl: text("logo_url"),
+    // Google Place ID — powers the "Post on Google" button on the review page.
+    // Optional; the owner can add it later from the business detail page.
+    googlePlaceId: text("google_place_id"),
+    // Public review page theme (set from the "Customize page" tab)
+    reviewPageStyle: text("review_page_style").notNull().default("gradient"), // "gradient" | "solid"
+    // #7fa7cf → the gradient renders as linear-gradient(to top, #dfe9f3, white)
+    reviewPageColor: text("review_page_color").notNull().default("#7fa7cf"),  // hex
+    reviewPageMessage: text("review_page_message"),  // greeting shown to customers
     // API credentials the SDK button uses
     apiKey: text("api_key")
       .notNull()

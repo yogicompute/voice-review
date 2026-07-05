@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import { QrCard } from "@/components/dashboard/QrCard";
+import { GooglePlaceIdCard } from "@/components/dashboard/GooglePlaceIdCard";
+import { BusinessTabs } from "@/components/dashboard/BusinessTabs";
 import { Building2, Key, ExternalLink } from "lucide-react";
 import { BarChart2 } from "lucide-react";
 import Link from "next/link";
@@ -52,9 +54,18 @@ export default async function BusinessDetailPage({
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-            <Building2 size={18} className="text-muted-foreground" />
-          </div>
+          {business.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={business.logoUrl}
+              alt={business.name}
+              className="w-10 h-10 rounded-full object-cover ring-1 ring-black/5"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+              <Building2 size={18} className="text-muted-foreground" />
+            </div>
+          )}
           <div>
             <h2 className="text-2xl font-semibold">{business.name}</h2>
             <p className="text-muted-foreground/70 text-sm">
@@ -66,6 +77,8 @@ export default async function BusinessDetailPage({
           {business.isActive ? "Active" : "Inactive"}
         </Badge>
       </div>
+
+      <BusinessTabs businessId={business.id} active="overview" />
 
       {/* API Credentials */}
       <Card>
@@ -106,6 +119,12 @@ export default async function BusinessDetailPage({
 
       {/* QR review page */}
       <QrCard url={reviewUrl} dataUrl={qrDataUrl} businessName={business.name} />
+
+      {/* Google reviews / Place ID */}
+      <GooglePlaceIdCard
+        businessId={business.id}
+        googlePlaceId={business.googlePlaceId}
+      />
 
       {/* Code snippet */}
       <Card>

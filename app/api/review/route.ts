@@ -52,13 +52,18 @@ async function handlePost(req: Request): Promise<NextResponse> {
     }
 
     const audioFile = formData.get("audio") as File | null;
+    const textInput = (formData.get("text") as string | null)?.trim() || null;
     const customerRef = formData.get("customerRef") as string | null;
 
-    if (!audioFile) {
-      return NextResponse.json({ error: "Missing audio file" }, { status: 400 });
+    // A review can be left by voice (audio) OR by typing (text). Require one.
+    if (!audioFile && !textInput) {
+      return NextResponse.json({ error: "Provide either audio or text" }, { status: 400 });
     }
-    if (audioFile.size > 5 * 1024 * 1024) {
+    if (audioFile && audioFile.size > 5 * 1024 * 1024) {
       return NextResponse.json({ error: "Audio file too large (max 5MB)" }, { status: 400 });
+    }
+    if (textInput && textInput.length > 2000) {
+      return NextResponse.json({ error: "Feedback is too long (max 2000 characters)" }, { status: 400 });
     }
 
     // ── 2. Plan limit check (single remaining awaited DB query) ──────
@@ -81,8 +86,8 @@ async function handlePost(req: Request): Promise<NextResponse> {
     // ── 3. Generate ID here; do NOT insert yet ───────────────────────
     const reviewId = crypto.randomUUID();
 
-    // Buffer is already in memory after formData(); this is cheap.
-    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+    // Buffer the audio now (already in memory after formData(); cheap).
+    const audioBuffer = audioFile ? Buffer.from(await audioFile.arrayBuffer()) : null;
 
     // ── 4. Everything else, including the insert, runs in background ─
     after(async () => {
@@ -95,6 +100,39 @@ async function handlePost(req: Request): Promise<NextResponse> {
           customerRef: customerRef ?? null,
         });
 
+        // ── Text review: no audio, no transcription — analyze directly ──
+        if (!audioBuffer) {
+          let metrics = {
+            rating: 3,
+            sentiment: "neutral",
+            likelyReturnRate: 50,
+            issueFlag: false,
+            summary: "Could not analyze feedback",
+          };
+          try {
+            metrics = await analyzeReview(textInput ?? "");
+          } catch (err) {
+            console.error("❌ Gemini analysis failed:", err);
+          }
+
+          await db
+            .update(reviews)
+            .set({
+              status: "completed",
+              transcript: textInput,
+              rating: metrics.rating,
+              sentiment: metrics.sentiment as
+                | "superhappy" | "happy" | "neutral" | "sad" | "angry",
+              likelyReturnRate: metrics.likelyReturnRate,
+              issueFlag: metrics.issueFlag,
+              summary: metrics.summary,
+              rawMetrics: JSON.stringify(metrics),
+            })
+            .where(eq(reviews.id, reviewId));
+          return;
+        }
+
+        // ── Voice review: upload audio, then transcribe + analyze ──
         let audioUrl: string | null = null;
         try {
           const uploaded = await uploadAudio(audioBuffer, `voicereview/${business.id}`);

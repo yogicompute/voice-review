@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { ReviewCard } from "@/components/dashboard/ReviewCard";
 import { ReviewFilters } from "@/components/dashboard/ReviewFilters";
 import { Pagination } from "@/components/dashboard/Pagination";
+import { BusinessTabs } from "@/components/dashboard/BusinessTabs";
 import { Suspense } from "react";
 import { ArrowLeft, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,8 @@ export default async function BusinessReviewsPage({
           </div>
         </div>
       </div>
+
+      <BusinessTabs businessId={business.id} active="reviews" />
 
       <Suspense>
         <ReviewFilters />

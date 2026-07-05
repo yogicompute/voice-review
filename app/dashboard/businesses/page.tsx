@@ -52,9 +52,18 @@ export default async function BusinessesPage() {
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardContent className="flex items-center justify-between py-4 px-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      <Building2 size={18} className="text-muted-foreground" />
-                    </div>
+                    {biz.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={biz.logoUrl}
+                        alt={biz.name}
+                        className="w-10 h-10 rounded-full object-cover ring-1 ring-black/5"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                        <Building2 size={18} className="text-muted-foreground" />
+                      </div>
+                    )}
                     <div>
                       <p className="font-medium">{biz.name}</p>
                       <p className="text-sm text-muted-foreground/70">{biz.category ?? "No category"}</p>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { db, users, businesses, subscriptions } from "@/lib/db";
+import { db, users, businesses } from "@/lib/db";
 import { eq, count } from "drizzle-orm";
 import { z } from "zod";
 import { nanoid } from "nanoid";
@@ -14,6 +14,13 @@ const createSchema = z.object({
     .regex(/^[A-Za-z][A-Za-z ]*$/, "Business name can only contain letters and spaces"),
   category: z.string().trim().min(2, "Category is required").max(50),
   logoUrl: z.string().url().optional(),
+  // Optional at registration — the owner can add it later from the business page.
+  googlePlaceId: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .transform((v) => (v ? v : undefined)),
 });
 
 export async function GET() {

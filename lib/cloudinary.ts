@@ -6,6 +6,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
+export async function uploadImage(
+  buffer: Buffer,
+  folder: string = "voicereview/logos"
+): Promise<{ url: string; publicId: string }> {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "image",
+        folder,
+        format: "webp",
+        transformation: [{ width: 512, height: 512, crop: "limit" }],
+      },
+      (error, result) => {
+        if (error || !result) return reject(error);
+        resolve({ url: result.secure_url, publicId: result.public_id });
+      }
+    );
+    stream.end(buffer);
+  });
+}
+
 export async function uploadAudio(
   buffer: Buffer,
   folder: string = "voicereview"

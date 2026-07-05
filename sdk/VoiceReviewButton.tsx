@@ -12,6 +12,8 @@ export interface VoiceReviewButtonProps {
   maxDuration?: number;        // seconds, default 30
   onSuccess?: (result: ReviewResult) => void;
   onError?: (error: string) => void;
+  onRecordingStart?: () => void;  // fires when the mic actually starts
+  onRecordingEnd?: () => void;    // fires when recording stops (tap or auto)
   showResultCard?: boolean;    // show the built-in metrics card (default true)
   className?: string;
   style?: React.CSSProperties;
@@ -64,6 +66,8 @@ export function VoiceReviewButton({
   maxDuration = 30,
   onSuccess,
   onError,
+  onRecordingStart,
+  onRecordingEnd,
   className = "",
   style = {},
   theme = {},
@@ -115,6 +119,7 @@ export function VoiceReviewButton({
       mediaRecorderRef.current = recorder;
       setStage("recording");
       setElapsed(0);
+      onRecordingStart?.();
 
       // Elapsed timer
       elapsedRef.current = setInterval(() => {
@@ -133,12 +138,14 @@ export function VoiceReviewButton({
   }
 
   function stopRecording() {
-    if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.stop();
+    const wasRecording = mediaRecorderRef.current?.state === "recording";
+    if (wasRecording) {
+      mediaRecorderRef.current?.stop();
     }
     if (timerRef.current) clearTimeout(timerRef.current);
     if (elapsedRef.current) clearInterval(elapsedRef.current);
     setStage("processing");
+    if (wasRecording) onRecordingEnd?.();
   }
 
   function handleClick() {

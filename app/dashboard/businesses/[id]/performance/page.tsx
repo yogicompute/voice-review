@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getBusinessAnalytics } from "@/lib/analytics";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { BusinessTabs } from "@/components/dashboard/BusinessTabs";
 import { RatingsChart } from "@/components/dashboard/RatingsChart";
 import { SentimentChart } from "@/components/dashboard/SentimentChart";
 import { ReturnRateChart } from "@/components/dashboard/ReturnRateChart";
@@ -49,6 +50,8 @@ export default async function PerformancePage({
           </p>
         </div>
       </div>
+
+      <BusinessTabs businessId={business.id} active="performance" />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
